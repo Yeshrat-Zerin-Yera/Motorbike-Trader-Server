@@ -1,0 +1,22 @@
+[
+    {
+        "img": "https://i.ibb.co/VHkTGH0/react-state-management.jpg",
+        "title": "What are the different ways to manage a state in a React application?",
+        "details": "Every React component has a built-in state. This state is an object which stores the property values that belong to a component. State is able to keep data from different components in-sync because each state update re-renders all relevant components. The built-in way that React provides for setting component states is by using setState() and adding “local state” to a class. There are several other ways to manage state​s in React, including the use of: Hooks, React Context API, Apollo Link State."
+    },
+    {
+        "img": "https://i.ibb.co/5GKHqqK/prototypal-inheritance.png",
+        "title": "How does prototypical inheritance work?",
+        "details": "Everything in Javascript is an object. Even when creating a Class is an Object via an Object Literal or Constructor Function. This is how Javascript does class-based programming as to other traditional Object-Oriented Programming languages where they use the keyword ‘class’ and ‘inheritance’. Javascript’s version of class-based programming and other traditional class-based programming languages work with the same concept but does not work exactly similar. There are differences in its keyword, syntax, and how it works. There are also debates regarding pros and cons of Javascript’s version of class-based programming, but for simplicity’s sake and learning purposes, I do not want to go over those issues. So, the core idea of Prototypal Inheritance is that an object can point to another object and inherit all its properties. The main purpose is to allow multiple instances of an object to share common properties, hence, the Singleton Pattern."
+    },
+    {
+        "img": "https://i.ibb.co/KxnsJV3/unit-testing.png",
+        "title": "What is a unit test? Why should we write unit tests?",
+        "details": "The main objective of unit testing is to isolate written code to test and determine if it works as intended. Unit testing is an important step in the development process, because if done correctly, it can help detect early flaws in code which may be more difficult to find in later testing stages. Unit testing is a software testing method where “units” the individual components of software are tested. Developers write unit tests for their code to make sure that the code works correctly. This helps to detect and protect against bugs in the future."
+    },
+    {
+        "img": "https://i.ibb.co/gtprFtM/react-angular-vue.jpg",
+        "title": "React vs. Angular vs. Vue?",
+        "details": "React is a free and open-source front-end JavaScript library for building user interfaces based on UI components. It is maintained by Meta and a community of individual developers and companies. Angular.js is an MVC framework. A major disadvantage of Angular is that it uses a regular DOM, and thus, the entire tree structure of the HTML tags is updated, which massively impacts the loading time. Angular.js has its Ionic framework for mobile applications. Vue.js is a JavaScript-based progressive framework for creating single-page applications. It was created with scalability and incrementality in mind, as well as ease of integration with other view layer frameworks."
+    }
+]

@@ -16,7 +16,31 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 // Run Function
 async function run() {
     try {
+        // Database & Collections
+        const userCollection = client.db('MotorbikeTraderDatabase').collection('Users');
+        const blogCollection = client.db('MotorbikeTraderDatabase').collection('Blogs');
 
+        // 🌼Users
+        // 🍒Post Users To Database
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            // Varify If This Email User Already In User Collection
+            const query = { email: user?.email };
+            const signUpUsers = await userCollection.find(query).toArray();
+            if (signUpUsers.length) {
+                return res.send({ acknowledged: false });
+            }
+            const result = await userCollection.insertOne(user);
+            res.send(result);
+        });
+
+        // 🌼Blogs
+        // 🍒Get Blogs From Database
+        app.get('/blogs', async (req, res) => {
+            const query = {};
+            const blogs = await blogCollection.find(query).toArray();
+            res.send(blogs);
+        });
     }
     finally { }
 };
