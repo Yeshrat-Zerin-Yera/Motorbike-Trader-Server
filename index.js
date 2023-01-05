@@ -34,7 +34,7 @@ async function run() {
             res.send(result);
         });
 
-        // 🍒Get User From Database By Email
+        // 🍒Get User Role From Database By Email
         app.get('/users/role/:email', async (req, res) => {
             const email = req?.params?.email;
             const query = { email: email };
@@ -42,6 +42,15 @@ async function run() {
             // Get Role Of The User
             const role = databaseUser?.role;
             res.send({ role: role });
+        });
+
+        // 🍒Get Sellers From Database By Role
+        app.get('/users/sellers', async (req, res) => {
+            const query = {};
+            const databaseUsers = await userCollection.find(query).toArray();
+            // Filter Database User By Role
+            const sellers = databaseUsers.filter(databaseUser => databaseUser?.role === 'Seller');
+            res.send(sellers);
         });
 
         // 🌼Blogs
