@@ -61,6 +61,20 @@ async function run() {
             res.send(result);
         });
 
+        // 🍒Verify A Seller From Database By Id
+        app.put('/users/:id', async (req, res) => {
+            const id = req?.params?.id;
+            const filter = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    status: 'Verified'
+                }
+            };
+            const options = { upsert: true };
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        });
+
         // 🌼Blogs
         // 🍒Get Blogs From Database
         app.get('/blogs', async (req, res) => {
