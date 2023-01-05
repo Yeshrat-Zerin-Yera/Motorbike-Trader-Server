@@ -23,7 +23,7 @@ async function run() {
         // 🌼Users
         // 🍒Post Users To Database
         app.post('/users', async (req, res) => {
-            const user = req.body;
+            const user = req?.body;
             // Varify If This Email User Already In User Collection
             const query = { email: user?.email };
             const signUpUsers = await userCollection.find(query).toArray();
@@ -32,6 +32,16 @@ async function run() {
             }
             const result = await userCollection.insertOne(user);
             res.send(result);
+        });
+
+        // 🍒Get User From Database By Email
+        app.get('/users/role/:email', async (req, res) => {
+            const email = req?.params?.email;
+            const query = { email: email };
+            const databaseUser = await userCollection.findOne(query);
+            // Get Role Of The User
+            const role = databaseUser?.role;
+            res.send({ role: role });
         });
 
         // 🌼Blogs
