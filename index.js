@@ -75,6 +75,15 @@ async function run() {
             res.send(result);
         });
 
+        // 🍒Get Buyers From Database By Role
+        app.get('/users/buyers', async (req, res) => {
+            const query = {};
+            const databaseUsers = await userCollection.find(query).toArray();
+            // Filter Database User By Role
+            const buyers = databaseUsers.filter(databaseUser => databaseUser?.role === 'Buyer');
+            res.send(buyers);
+        });
+
         // 🌼Blogs
         // 🍒Get Blogs From Database
         app.get('/blogs', async (req, res) => {
