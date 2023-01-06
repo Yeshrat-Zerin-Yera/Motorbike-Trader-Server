@@ -93,10 +93,12 @@ async function run() {
             res.send(result);
         });
 
-        // 🍒Get Products From Database
+        // 🍒Get Products From Database By Email
         app.get('/products', async (req, res) => {
-            const query = {};
+            const email = req?.query?.email;
+            const query = { email: email };
             const products = await productCollection.find(query).toArray();
+            console.log(products);
             res.send(products);
         });
 
@@ -114,12 +116,28 @@ async function run() {
             res.send(result);
         });
 
-        // Delete A Product From Database
+        // 🍒Delete A Product From Database
         app.delete('/products/:id', async (req, res) => {
             const id = req?.params?.id;
             const query = { _id: ObjectId(id) };
             const result = await productCollection.deleteOne(query);
             res.send(result);
+        });
+
+        // 🍒Get Products By Category
+        app.get('/categories/:id', async (req, res) => {
+            const id = req?.params?.id;
+            // Get Category By Id
+            let category;
+            if (id === '1') category = 'Yamaha';
+            else if (id === '2') category = 'Honda';
+            else if (id === '3') category = 'Suzuki';
+            else if (id === '4') category = 'Hero';
+            else if (id === '5') category = 'Bajaj';
+            else category = 'TVS';
+            const query = { category: category };
+            const products = await productCollection.find(query).toArray();
+            res.send(products);
         });
 
         // 🌼Blogs
