@@ -147,6 +147,14 @@ async function run() {
             const blogs = await blogCollection.find(query).toArray();
             res.send(blogs);
         });
+
+        // 🍒Get A Blog From Database By Id
+        app.get('/blogs/:id', async (req, res) => {
+            const id = req?.params?.id;
+            const query = { _id: ObjectId(id) };
+            const blog = await blogCollection.findOne(query);
+            res.send(blog);
+        });
     }
     finally { }
 };
