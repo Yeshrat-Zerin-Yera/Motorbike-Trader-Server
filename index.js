@@ -93,6 +93,13 @@ async function run() {
             res.send(result);
         });
 
+        // 🍒Get Products From Database
+        app.get('/products', async (req, res) => {
+            const query = {};
+            const products = await productCollection.find(query).toArray();
+            res.send(products);
+        });
+
         // 🌼Blogs
         // 🍒Get Blogs From Database
         app.get('/blogs', async (req, res) => {
