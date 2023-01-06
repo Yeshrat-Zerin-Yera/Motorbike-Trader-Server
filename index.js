@@ -100,6 +100,20 @@ async function run() {
             res.send(products);
         });
 
+        // 🍒Advertise A Product From Database
+        app.put('/products/advertise/:id', async (req, res) => {
+            const id = req?.params?.id;
+            const filter = { _id: ObjectId(id) };
+            updateDoc = {
+                $set: {
+                    advertised: true
+                }
+            };
+            const options = { upsert: true };
+            const result = await productCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        });
+
         // 🌼Blogs
         // 🍒Get Blogs From Database
         app.get('/blogs', async (req, res) => {
