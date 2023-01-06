@@ -19,6 +19,7 @@ async function run() {
         // Database & Collections
         const userCollection = client.db('MotorbikeTraderDatabase').collection('Users');
         const blogCollection = client.db('MotorbikeTraderDatabase').collection('Blogs');
+        const productCollection = client.db('MotorbikeTraderDatabase').collection('Products');
 
         // 🌼Users
         // 🍒Post Users To Database
@@ -82,6 +83,14 @@ async function run() {
             // Filter Database User By Role
             const buyers = databaseUsers.filter(databaseUser => databaseUser?.role === 'Buyer');
             res.send(buyers);
+        });
+
+        // 🌼Products
+        // 🍒Post Products To Database
+        app.post('/products', async (req, res) => {
+            const product = req.body;
+            const result = await productCollection.insertOne(product);
+            res.send(result);
         });
 
         // 🌼Blogs
