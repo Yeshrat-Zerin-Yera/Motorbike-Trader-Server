@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -21,6 +22,7 @@ async function run() {
         const blogCollection = client.db('MotorbikeTraderDatabase').collection('Blogs');
         const productCollection = client.db('MotorbikeTraderDatabase').collection('Products');
         const bookingCollection = client.db('MotorbikeTraderDatabase').collection('Bookings');
+        const paymentCollection = client.db('MotorbikeTraderDatabase').collection('Payments');
 
         // 🌼Users
         // 🍒Post Users To Database
@@ -102,7 +104,7 @@ async function run() {
             res.send(products);
         });
 
-        // 🍒Advertise A Product From Database
+        // 🍒Advertise A Product From Database By Id
         app.put('/products/advertise/:id', async (req, res) => {
             const id = req?.params?.id;
             const filter = { _id: ObjectId(id) };
@@ -116,7 +118,7 @@ async function run() {
             res.send(result);
         });
 
-        // 🍒Delete A Product From Database
+        // 🍒Delete A Product From Database By Id
         app.delete('/products/:id', async (req, res) => {
             const id = req?.params?.id;
             const query = { _id: ObjectId(id) };
@@ -124,7 +126,7 @@ async function run() {
             res.send(result);
         });
 
-        // 🍒Get Products By Category
+        // 🍒Get Products By Category Id
         app.get('/categories/:id', async (req, res) => {
             const id = req?.params?.id;
             // Get Category By Id
@@ -137,40 +139,7 @@ async function run() {
             else category = 'TVS';
             const query = { category: category };
             const products = await productCollection.find(query).toArray();
-            // Check If Product Seller Verified
-            // const usersQuery = { status: 'Verified' };
-            // const users = await userCollection.find(usersQuery).toArray();
-            // users.forEach(user => {
-            //     const verifiedProducts = products.filter(product => product?.email === user?.email);
-            //     verifiedProducts.map(verifiedProduct => {
-            //         app.patch('/categories/:id', async (req, res) => {
-            //             const email = verifiedProduct?.email;
-            //             filter = { email: email };
-            //             const updateDoc = {
-            //                 $set: {
-            //                     isSellerVerified: true
-            //                 }
-            //             };
-            //             const result = await productCollection.updateMany(filter, updateDoc);
-            //             res.send(result);
-            //         });
-            //     });
-            // });
             res.send(products);
-        });
-
-        // 🍒Change Status Of A Product From Database
-        app.put('/products/status/:id', async (req, res) => {
-            const id = req?.params?.id;
-            const filter = { _id: ObjectId(id) };
-            updateDoc = {
-                $set: {
-                    status: 'Sold'
-                }
-            };
-            const options = { upsert: true };
-            const result = await productCollection.updateOne(filter, updateDoc, options);
-            res.send(result);
         });
 
         // 🌼Bookings
@@ -178,6 +147,66 @@ async function run() {
         app.post('/bookings', async (req, res) => {
             const booking = req.body;
             const result = await bookingCollection.insertOne(booking);
+            res.send(result);
+        });
+
+        // 🍒Get Bookings From Database By Email
+        app.get('/bookings', async (req, res) => {
+            const email = req?.query?.email;
+            const query = { buyerEmail: email };
+            const bookings = await bookingCollection.find(query).toArray();
+            res.send(bookings);
+        });
+
+        // 🍒Get A Booking From Database By Id
+        app.get('/bookings/payment/:id', async (req, res) => {
+            const id = req?.params?.id;
+            const query = { _id: ObjectId(id) };
+            const booking = await bookingCollection.findOne(query);
+            res.send(booking);
+        });
+
+        // 🌼Payment
+        // 🍒Create Payment Intent
+        app.post('/create-payment-intent', async (req, res) => {
+            const booking = req.body;
+            const price = booking?.resellPrice;
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                currency: 'usd',
+                amount: amount,
+                "payment_method_types": [
+                    "card"
+                ]
+            });
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
+        });
+
+        // 🍒Post Payment To Database
+        app.post('/payments', async (req, res) => {
+            const payment = req.body;
+            const result = await paymentCollection.insertOne(payment);
+            // Set Booking Paid To True
+            const bookingId = payment?.bookingId;
+            const filter = { _id: ObjectId(bookingId) };
+            const updateDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment?.transactionId
+                }
+            }
+            // Change Product Status To Sold
+            const productId = payment?.productId;
+            const productFilter = { _id: ObjectId(productId) };
+            const productUpdateDoc = {
+                $set: {
+                    status: 'Sold'
+                }
+            }
+            const updatedResult = await bookingCollection.updateOne(filter, updateDoc);
+            const productUpdatedReasult = await productCollection.updateOne(productFilter, productUpdateDoc);
             res.send(result);
         });
 
