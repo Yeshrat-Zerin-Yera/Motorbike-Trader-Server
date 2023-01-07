@@ -136,6 +136,25 @@ async function run() {
             else category = 'TVS';
             const query = { category: category };
             const products = await productCollection.find(query).toArray();
+            // Check If Product Seller Verified
+            // const usersQuery = { status: 'Verified' };
+            // const users = await userCollection.find(usersQuery).toArray();
+            // users.forEach(user => {
+            //     const verifiedProducts = products.filter(product => product?.email === user?.email);
+            //     verifiedProducts.map(verifiedProduct => {
+            //         app.patch('/categories/:id', async (req, res) => {
+            //             const email = verifiedProduct?.email;
+            //             filter = { email: email };
+            //             const updateDoc = {
+            //                 $set: {
+            //                     isSellerVerified: true
+            //                 }
+            //             };
+            //             const result = await productCollection.updateMany(filter, updateDoc);
+            //             res.send(result);
+            //         });
+            //     });
+            // });
             res.send(products);
         });
 
