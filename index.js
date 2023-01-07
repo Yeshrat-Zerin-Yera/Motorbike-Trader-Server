@@ -20,6 +20,7 @@ async function run() {
         const userCollection = client.db('MotorbikeTraderDatabase').collection('Users');
         const blogCollection = client.db('MotorbikeTraderDatabase').collection('Blogs');
         const productCollection = client.db('MotorbikeTraderDatabase').collection('Products');
+        const bookingCollection = client.db('MotorbikeTraderDatabase').collection('Bookings');
 
         // 🌼Users
         // 🍒Post Users To Database
@@ -156,6 +157,28 @@ async function run() {
             //     });
             // });
             res.send(products);
+        });
+
+        // 🍒Change Status Of A Product From Database
+        app.put('/products/status/:id', async (req, res) => {
+            const id = req?.params?.id;
+            const filter = { _id: ObjectId(id) };
+            updateDoc = {
+                $set: {
+                    status: 'Sold'
+                }
+            };
+            const options = { upsert: true };
+            const result = await productCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        });
+
+        // 🌼Bookings
+        // 🍒Post A Booking To Database
+        app.post('/bookings', async (req, res) => {
+            const booking = req.body;
+            const result = await bookingCollection.insertOne(booking);
+            res.send(result);
         });
 
         // 🌼Blogs
