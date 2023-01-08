@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const app = express();
 const port = process.env.PORT || 5000;
@@ -14,6 +15,23 @@ app.use(express.json());
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.3drcjwz.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+// Varify JWT Function
+function verifyJWT(req, res, next) {
+    console.log(req.headers.authorization);
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send('Unauthorized Access');
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+        if (err) {
+            return res.status(403).send({ message: 'Forbidden Access' });
+        }
+        req.decoded = decoded;
+        next();
+    });
+};
+
 // Run Function
 async function run() {
     try {
@@ -23,6 +41,17 @@ async function run() {
         const productCollection = client.db('MotorbikeTraderDatabase').collection('Products');
         const bookingCollection = client.db('MotorbikeTraderDatabase').collection('Bookings');
         const paymentCollection = client.db('MotorbikeTraderDatabase').collection('Payments');
+
+        // Verify Seller
+        const verifySeller = async (req, rex, next) => {
+            const decodedEmail = req.decoded.email;
+            const filter = { email: decodedEmail };
+            const user = await userCollection.findOne(filter);
+            if (user?.role !== 'Seller') {
+                return res.status(403).send({ message: 'Forbidden Access' });
+            }
+            next();
+        };
 
         // 🌼Users
         // 🍒Post Users To Database
@@ -80,7 +109,7 @@ async function run() {
         });
 
         // 🍒Get Buyers From Database By Role
-        app.get('/users/buyers', async (req, res) => {
+        app.get('/users/buyers', verifyJWT, async (req, res) => {
             const query = {};
             const databaseUsers = await userCollection.find(query).toArray();
             // Filter Database User By Role
@@ -89,8 +118,8 @@ async function run() {
         });
 
         // 🌼Products
-        // 🍒Post Products To Database
-        app.post('/products', async (req, res) => {
+        // 🍒Post A Product To Database
+        app.post('/products', verifyJWT, verifySeller, async (req, res) => {
             const product = req.body;
             const result = await productCollection.insertOne(product);
             res.send(result);
@@ -143,7 +172,7 @@ async function run() {
         });
 
         // 🍒Get Advertised Products From Database By Advertised & Status Field
-        app.get('/products/advertised', async (req, res) => {
+        app.get('/products/advertised', verifyJWT, async (req, res) => {
             const query = { advertised: true, status: 'Available' };
             const products = await productCollection.find(query).toArray();
             res.send(products);
@@ -179,8 +208,12 @@ async function run() {
         });
 
         // 🍒Get Bookings From Database By Email
-        app.get('/bookings', async (req, res) => {
+        app.get('/bookings', verifyJWT, async (req, res) => {
             const email = req?.query?.email;
+            const decodedEmail = req.decoded.email;
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'Forbidden Access' });
+            }
             const query = { buyerEmail: email };
             const bookings = await bookingCollection.find(query).toArray();
             res.send(bookings);
@@ -252,6 +285,21 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const blog = await blogCollection.findOne(query);
             res.send(blog);
+        });
+
+        // 🌼JWT
+        // 🍒Get Users & Send JWT Token
+        // node > require('crypto').randomBytes(64).toString('hex')
+        app.get('/jwt', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            console.log(user);
+            if (user) {
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '1h' });
+                return res.send({ accessToken: token });
+            }
+            res.status(403).send({ accessToken: '' });
         });
     }
     finally { }
