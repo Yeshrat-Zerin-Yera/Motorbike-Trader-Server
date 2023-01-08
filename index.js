@@ -142,6 +142,13 @@ async function run() {
             res.send(products);
         });
 
+        // 🍒Get Advertised Products From Database By Advertised Field
+        app.get('/products/advertised', async (req, res) => {
+            const query = { advertised: true, status: 'Available' };
+            const products = await productCollection.find(query).toArray();
+            res.send(products);
+        });
+
         // 🌼Bookings
         // 🍒Post A Booking To Database
         app.post('/bookings', async (req, res) => {
