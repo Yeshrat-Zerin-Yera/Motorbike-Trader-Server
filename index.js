@@ -142,9 +142,30 @@ async function run() {
             res.send(products);
         });
 
-        // 🍒Get Advertised Products From Database By Advertised Field
+        // 🍒Get Advertised Products From Database By Advertised & Status Field
         app.get('/products/advertised', async (req, res) => {
             const query = { advertised: true, status: 'Available' };
+            const products = await productCollection.find(query).toArray();
+            res.send(products);
+        });
+
+        // 🍒Report A Product From Database By Id
+        app.put('/products/report/:id', async (req, res) => {
+            const id = req?.params?.id;
+            const filter = { _id: ObjectId(id) };
+            updateDoc = {
+                $set: {
+                    isReported: true
+                }
+            };
+            const options = { upsert: true };
+            const result = await productCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        });
+
+        // 🍒Get Reported Products From Database By Is Reported Field
+        app.get('/reportedproducts', async (req, res) => {
+            const query = { isReported: true };
             const products = await productCollection.find(query).toArray();
             res.send(products);
         });
