@@ -172,7 +172,7 @@ async function run() {
         });
 
         // 🍒Get Advertised Products From Database By Advertised & Status Field
-        app.get('/products/advertised', verifyJWT, async (req, res) => {
+        app.get('/products/advertised', async (req, res) => {
             const query = { advertised: true, status: 'Available' };
             const products = await productCollection.find(query).toArray();
             res.send(products);
